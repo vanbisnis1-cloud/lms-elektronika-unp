@@ -1,17 +1,19 @@
 import streamlit as st
-import google.generativeai as genai
+from groq import Groq
 
-# Setup API
-API_KEY = st.secrets["GEMINI_API_KEY"]
-genai.configure(api_key=API_KEY)
+# 1. Koneksi API Groq via Secrets
+try:
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+except Exception:
+    st.error("API Key Groq tidak ditemukan di Secrets!")
+    st.stop()
 
-# Gunakan model yang terdeteksi aktif di akun Anda
-model = genai.GenerativeModel('gemini-2.0-flash')
-
-st.title("🤖 Asisten AI Elektronika v2.0")
-st.caption("Status: Monitoring Kuota 📊")
+# 2. Header Chatbot Profesional
+st.title("🤖 Asisten AI Elektronika (Groq Engine)")
+st.caption("MK: Pengajaran Berbantuan Komputer | Dosen: Dr. Yasdinul Huda, S.Pd., MT")
 st.markdown("---")
 
+# 3. Pengelolaan Riwayat Chat
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -19,21 +21,27 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Tanya sesuatu..."):
+# 4. Input & Respon Instan (Llama 3)
+if prompt := st.chat_input("Tanyakan rumus atau komponen elektronika..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Sedang memproses..."):
+        with st.spinner("Berpikir secepat kilat..."):
             try:
-                response = model.generate_content(prompt)
-                st.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
+                # Menggunakan model Llama 3.3 70B yang sangat pintar
+                completion = client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[
+                        {"role": "system", "content": "Anda adalah asisten ahli Elektronika Dasar UNP. Jawablah dengan edukatif dan profesional."},
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+                
+                response = completion.choices[0].message.content
+                st.markdown(response)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                
             except Exception as e:
-                # Menangani Error Quota (429) agar tetap terlihat profesional
-                if "429" in str(e):
-                    st.warning("⚠️ **Server Sibuk (Limit Kuota Gratis)**")
-                    st.info("Mohon tunggu sekitar 60 detik sebelum mengirim pertanyaan berikutnya. Ini adalah batasan versi gratis dari Google API.")
-                else:
-                    st.error(f"Terjadi gangguan teknis: {e}")
+                st.error(f"Gagal memproses jawaban: {e}")
