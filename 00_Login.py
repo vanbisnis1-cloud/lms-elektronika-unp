@@ -9,9 +9,9 @@ if "logged_in" not in st.session_state:
 if "auth_mode" not in st.session_state:
     st.session_state["auth_mode"] = "login"
 
-# --- FUNGSI TAMPILAN LOGO (Stabil di Desktop & Mobile) ---
+# --- FUNGSI TAMPILAN LOGO (Centering untuk Laptop & Mobile) ---
 def show_logo():
-    # Menggunakan HTML CSS agar logo tetap di tengah sempurna di HP
+    # Centering pakem menggunakan HTML Flexbox
     logo_url = "https://raw.githubusercontent.com/vanbisnis1-cloud/lms-elektronika-unp/main/logo_unp.png"
     st.markdown(
         f"""
@@ -22,18 +22,20 @@ def show_logo():
         unsafe_allow_html=True
     )
 
-# --- FUNGSI TAMPILAN DEVELOPER (Data Kelompok) ---
+# --- FUNGSI TAMPILAN DEVELOPER (Update MK & Dosen) ---
 def show_developer_info():
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown("---")
+    # Expander untuk informasi tim dan mata kuliah
     with st.expander("👤 Tim Pengembang Aplikasi (Developer Team)"):
-        st.write("Proyek Akhir Mata Kuliah Pemrograman Dasar")
+        st.markdown("### **Proyek Akhir Mata Kuliah Pengajaran Berbantuan Komputer**")
+        st.markdown("#### **Dosen Pengampu: Dr. Yasdinul Huda, S.Pd., MT**")
         st.markdown("---")
 
         # Anggota 1: Ivan
         c1_f, c1_t = st.columns([1, 2.5])
         with c1_f:
-            st.image("foto_ivan.png", use_container_width=True) # Foto 1080x1080
+            st.image("foto_ivan.png", use_container_width=True)
         with c1_t:
             st.markdown("#### **Ivan Bachri Arrizki**")
             st.write("**NIM:** 23065028")
@@ -59,57 +61,56 @@ def show_developer_info():
             st.write("**NIM:** 23065026")
 
         st.markdown("---")
-        st.caption("© 2024 Pendidikan Teknik Elektronika - UNP")
+        st.caption("© 2024 Pendidikan Teknik Elektronika - Universitas Negeri Padang")
 
-# --- FUNGSI HALAMAN UTAMA ---
+# --- FUNGSI HALAMAN LOGIN & REGISTER ---
 
 def login_page():
     if st.session_state["auth_mode"] == "login":
         show_logo()
         st.markdown("<h1 style='text-align: center; color: #01579b; margin-top: -20px;'>LMS Elektronika Dasar</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; font-weight: bold;'>Universitas Negeri Padang</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>Universitas Negeri Padang</p>", unsafe_allow_html=True)
         st.markdown("---")
         
         st.header("Silakan Masuk")
         with st.form("login_form"):
             username = st.text_input("Username").lower()
             password = st.text_input("Password", type="password")
-            submit = st.form_submit_button("Masuk Sekarang", use_container_width=True)
-
+            submit = st.form_submit_button("Masuk", use_container_width=True)
             if submit:
                 if login_user(username, password):
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = username
-                    st.success(f"Selamat datang, {username.capitalize()}!")
+                    st.success(f"Selamat datang!")
                     time.sleep(0.5)
-                    st.rerun() 
+                    st.rerun()
                 else:
                     st.error("Username atau Password salah.")
         
-        st.markdown("<p style='text-align: center;'>Belum punya akun?</p>", unsafe_allow_html=True)
+        st.write("Belum punya akun?")
         if st.button("Daftar di sini", use_container_width=True):
             st.session_state["auth_mode"] = "register"
             st.rerun()
-
-        # Menampilkan info tim pengembang di bawah halaman login
+        
+        # Menampilkan info tim di bagian paling bawah
         show_developer_info()
     else:
         register_page()
 
 def register_page():
     show_logo()
-    st.title("Pendaftaran Akun Baru")
+    st.title("Pendaftaran Siswa Baru")
     with st.form("reg_form"):
-        new_user = st.text_input("Buat Username").lower()
-        new_pw = st.text_input("Buat Password", type="password")
+        u = st.text_input("Username").lower()
+        p = st.text_input("Password", type="password")
         if st.form_submit_button("Daftar Akun", use_container_width=True):
-            if add_user(new_user, new_pw):
-                st.success("Akun berhasil dibuat! Silakan masuk.")
+            if add_user(u, p):
+                st.success("Berhasil! Silakan masuk kembali.")
                 st.session_state["auth_mode"] = "login"
                 time.sleep(1)
                 st.rerun()
             else:
-                st.warning("Username sudah digunakan.")
+                st.warning("Username sudah terdaftar.")
     if st.button("Kembali ke Login", use_container_width=True):
         st.session_state["auth_mode"] = "login"
         st.rerun()
@@ -119,24 +120,22 @@ def logout():
     st.session_state["auth_mode"] = "login"
     st.rerun()
 
-# --- LOGIKA NAVIGASI (MULTI-PAGE) ---
+# --- SISTEM NAVIGASI AMAN ---
+l_s = st.Page(login_page, title="Login", icon="🔒")
+d_s = st.Page("modules/01_Dashboard.py", title="Dashboard", icon="🏠")
+c_s = st.Page("modules/02_Chatbot.py", title="Asisten AI", icon="🤖")
+m_s = st.Page("modules/03_Materi.py", title="Materi Pembelajaran", icon="📚")
+k_s = st.Page("modules/04_Kuis.py", title="Kuis Evaluasi", icon="📝")
+o_s = st.Page(logout, title="Logout", icon="🚪")
 
-# Definisi halaman dari folder modules
-login_screen = st.Page(login_page, title="Masuk", icon="🔒")
-dashboard = st.Page("modules/01_Dashboard.py", title="Dashboard", icon="🏠")
-chatbot = st.Page("modules/02_Chatbot.py", title="Asisten AI", icon="🤖")
-materi = st.Page("modules/03_Materi.py", title="Materi Pembelajaran", icon="📚")
-kuis = st.Page("modules/04_Kuis.py", title="Kuis Evaluasi", icon="📝")
-logout_screen = st.Page(logout, title="Keluar", icon="🚪")
-
-# Kontrol Sidebar: Sembunyikan jika belum login
+# Sembunyikan sidebar sebelum login
 if not st.session_state["logged_in"]:
-    pg = st.navigation([login_screen], position="hidden")
+    pg = st.navigation([l_s], position="hidden")
 else:
     pg = st.navigation({
-        "Menu Utama": [dashboard, materi, kuis],
-        "Bantuan AI": [chatbot],
-        "Sistem": [logout_screen]
+        "LMS Utama": [d_s, m_s, k_s], 
+        "Bantuan AI": [c_s], 
+        "Akun": [o_s]
     })
 
 pg.run()
