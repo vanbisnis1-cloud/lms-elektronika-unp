@@ -9,20 +9,64 @@ if "logged_in" not in st.session_state:
 if "auth_mode" not in st.session_state:
     st.session_state["auth_mode"] = "login"
 
-# --- FUNGSI TAMPILAN LOGO ---
+# --- FUNGSI TAMPILAN LOGO (Stabil di Desktop & Mobile) ---
 def show_logo():
-    # Menggunakan kolom untuk memposisikan logo di tengah
-    col1, col2, col3 = st.columns([1, 0.6, 1])
-    with col2:
-        # Langsung memanggil file dari root repositori GitHub Anda
-        st.image("logo_unp.png", width=120)
+    # Menggunakan HTML CSS agar logo tetap di tengah sempurna di HP
+    logo_url = "https://raw.githubusercontent.com/vanbisnis1-cloud/lms-elektronika-unp/main/logo_unp.png"
+    st.markdown(
+        f"""
+        <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+            <img src="{logo_url}" width="120">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-# --- FUNGSI HALAMAN LOGIN ---
+# --- FUNGSI TAMPILAN DEVELOPER (Data Kelompok) ---
+def show_developer_info():
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("---")
+    with st.expander("👤 Tim Pengembang Aplikasi (Developer Team)"):
+        st.write("Proyek Akhir Mata Kuliah Pemrograman Dasar")
+        st.markdown("---")
+
+        # Anggota 1: Ivan
+        c1_f, c1_t = st.columns([1, 2.5])
+        with c1_f:
+            st.image("foto_ivan.png", use_container_width=True) # Foto 1080x1080
+        with c1_t:
+            st.markdown("#### **Ivan Bachri Arrizki**")
+            st.write("**NIM:** 23065028")
+        
+        st.divider()
+
+        # Anggota 2: Lidia
+        c2_f, c2_t = st.columns([1, 2.5])
+        with c2_f:
+            st.image("foto_lidia.png", use_container_width=True)
+        with c2_t:
+            st.markdown("#### **Lidia Puspita**")
+            st.write("**NIM:** 23065009")
+
+        st.divider()
+
+        # Anggota 3: Fitri
+        c3_f, c3_t = st.columns([1, 2.5])
+        with c3_f:
+            st.image("foto_fitri.png", use_container_width=True)
+        with c3_t:
+            st.markdown("#### **Fitri Nur Nazmi**")
+            st.write("**NIM:** 23065026")
+
+        st.markdown("---")
+        st.caption("© 2024 Pendidikan Teknik Elektronika - UNP")
+
+# --- FUNGSI HALAMAN UTAMA ---
+
 def login_page():
     if st.session_state["auth_mode"] == "login":
-        show_logo() # Memanggil logo di bagian paling atas
-        
-        st.markdown("<h1 style='text-align: center; color: #01579b;'>LMS Elektronika Dasar</h1>", unsafe_allow_html=True)
+        show_logo()
+        st.markdown("<h1 style='text-align: center; color: #01579b; margin-top: -20px;'>LMS Elektronika Dasar</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; font-weight: bold;'>Universitas Negeri Padang</p>", unsafe_allow_html=True)
         st.markdown("---")
         
@@ -30,11 +74,10 @@ def login_page():
         with st.form("login_form"):
             username = st.text_input("Username").lower()
             password = st.text_input("Password", type="password")
-            submit = st.form_submit_button("Masuk", use_container_width=True)
+            submit = st.form_submit_button("Masuk Sekarang", use_container_width=True)
 
             if submit:
-                result = login_user(username, password)
-                if result:
+                if login_user(username, password):
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = username
                     st.success(f"Selamat datang, {username.capitalize()}!")
@@ -43,70 +86,57 @@ def login_page():
                 else:
                     st.error("Username atau Password salah.")
         
-        # Link navigasi ke halaman pendaftaran
         st.markdown("<p style='text-align: center;'>Belum punya akun?</p>", unsafe_allow_html=True)
         if st.button("Daftar di sini", use_container_width=True):
             st.session_state["auth_mode"] = "register"
             st.rerun()
+
+        # Menampilkan info tim pengembang di bawah halaman login
+        show_developer_info()
     else:
         register_page()
 
-# --- FUNGSI HALAMAN REGISTER ---
 def register_page():
     show_logo()
     st.title("Pendaftaran Akun Baru")
-    st.write("Silakan isi data di bawah untuk membuat akun siswa.")
-    
     with st.form("reg_form"):
         new_user = st.text_input("Buat Username").lower()
         new_pw = st.text_input("Buat Password", type="password")
-        confirm_pw = st.text_input("Konfirmasi Password", type="password")
-        submit_reg = st.form_submit_button("Daftar Akun Sekarang", use_container_width=True)
-
-        if submit_reg:
-            if new_pw != confirm_pw:
-                st.error("Konfirmasi password tidak cocok.")
-            elif len(new_pw) < 6:
-                st.warning("Password minimal 6 karakter.")
+        if st.form_submit_button("Daftar Akun", use_container_width=True):
+            if add_user(new_user, new_pw):
+                st.success("Akun berhasil dibuat! Silakan masuk.")
+                st.session_state["auth_mode"] = "login"
+                time.sleep(1)
+                st.rerun()
             else:
-                if add_user(new_user, new_pw):
-                    st.success("Akun berhasil dibuat! Silakan masuk.")
-                    st.session_state["auth_mode"] = "login"
-                    time.sleep(1.5)
-                    st.rerun()
-                else:
-                    st.warning("Username sudah digunakan. Silakan pilih yang lain.")
-    
-    if st.button("Kembali ke Halaman Login", use_container_width=True):
+                st.warning("Username sudah digunakan.")
+    if st.button("Kembali ke Login", use_container_width=True):
         st.session_state["auth_mode"] = "login"
         st.rerun()
 
-# --- FUNGSI LOGOUT ---
 def logout():
     st.session_state["logged_in"] = False
     st.session_state["auth_mode"] = "login"
     st.rerun()
 
-# --- SISTEM NAVIGASI MULTI-HALAMAN ---
+# --- LOGIKA NAVIGASI (MULTI-PAGE) ---
 
-# Pastikan path mengarah ke folder 'modules' yang sudah Anda buat
-login_screen = st.Page(login_page, title="Masuk Ke Sistem", icon="🔒")
+# Definisi halaman dari folder modules
+login_screen = st.Page(login_page, title="Masuk", icon="🔒")
 dashboard = st.Page("modules/01_Dashboard.py", title="Dashboard", icon="🏠")
 chatbot = st.Page("modules/02_Chatbot.py", title="Asisten AI", icon="🤖")
 materi = st.Page("modules/03_Materi.py", title="Materi Pembelajaran", icon="📚")
 kuis = st.Page("modules/04_Kuis.py", title="Kuis Evaluasi", icon="📝")
-logout_screen = st.Page(logout, title="Keluar dari Sistem", icon="🚪")
+logout_screen = st.Page(logout, title="Keluar", icon="🚪")
 
-# Pengaturan visibilitas menu sidebar
+# Kontrol Sidebar: Sembunyikan jika belum login
 if not st.session_state["logged_in"]:
-    # Jika belum login, sidebar disembunyikan (Akses Terkunci)
     pg = st.navigation([login_screen], position="hidden")
 else:
-    # Jika sudah login, tampilkan menu berdasarkan kategori
     pg = st.navigation({
         "Menu Utama": [dashboard, materi, kuis],
-        "Fitur Cerdas": [chatbot],
-        "Akun": [logout_screen]
+        "Bantuan AI": [chatbot],
+        "Sistem": [logout_screen]
     })
 
 pg.run()
