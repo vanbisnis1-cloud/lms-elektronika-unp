@@ -20,8 +20,7 @@ def show_logo():
 def login_page():
     if st.session_state["auth_mode"] == "login":
         show_logo()
-        st.markdown("<h1 style='text-align: center; color: #01579b;'>LMS Elektronika Dasar</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center;'>Simulasi Mengajar</p>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #01579b;'>LMS SMKN 1 KERUMUTAN</h1>", unsafe_allow_html=True)
         st.markdown("---")
         
         with st.form("login"):
