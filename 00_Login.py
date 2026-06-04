@@ -8,47 +8,24 @@ if "logged_in" not in st.session_state:
 if "auth_mode" not in st.session_state:
     st.session_state["auth_mode"] = "login"
 
-# Centering logo untuk mobile
+# Centering logo untuk mobile - Logo diupdate ke SMK Bisa Hebat
 def show_logo():
-    logo_url = "https://raw.githubusercontent.com/vanbisnis1-cloud/lms-elektronika-unp/main/logo_unp.png"
+    # URL logo SMK Bisa Hebat
+    logo_url = "https://smkbisa.kemdikbud.go.id/wp-content/uploads/2021/04/Logo-SMK-Bisa-Hebat.png"
     st.markdown(
         f"""
         <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-            <img src="{logo_url}" width="120">
+            <img src="{logo_url}" width="200">
         </div>
         """,
         unsafe_allow_html=True
     )
 
-# Info pengembang dengan foto
-def show_developer_info():
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    st.markdown("---")
-    with st.expander("👤 Tim Pengembang Aplikasi (Developer Team)"):
-        st.markdown("### **Proyek Akhir Mata Kuliah Pengajaran Berbantuan Komputer**")
-        st.markdown("#### **Dosen Pengampu: Dr. Yasdinul Huda, S.Pd., MT**")
-        st.markdown("---")
-
-        members = [
-            ("foto_ivan.png", "Ivan Bachri Arrizki", "23065028"),
-            ("foto_lidia.png", "Lidia Puspita", "23065009"),
-            ("foto_fitri.png", "Fitri Nur Nazmi", "23065026")
-        ]
-
-        for foto, nama, nim in members:
-            col1, col2 = st.columns([1, 3])
-            with col1:
-                st.image(foto, use_container_width=True)
-            with col2:
-                st.markdown(f"#### **{nama}**")
-                st.write(f"**NIM:** {nim}")
-            st.divider()
-
 def login_page():
     if st.session_state["auth_mode"] == "login":
         show_logo()
         st.markdown("<h1 style='text-align: center; color: #01579b;'>LMS Elektronika Dasar</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center;'>Universitas Negeri Padang</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>Simulasi Mengajar</p>", unsafe_allow_html=True)
         st.markdown("---")
         
         with st.form("login"):
@@ -64,12 +41,11 @@ def login_page():
         if st.button("Daftar Akun Baru", use_container_width=True):
             st.session_state["auth_mode"] = "register"
             st.rerun()
-        show_developer_info()
     else: register_page()
 
 def register_page():
     show_logo()
-    st.title("Pendaftaran Akun Baru") # Label netral
+    st.title("Pendaftaran Akun Baru")
     with st.form("reg"):
         u = st.text_input("Username Baru").lower()
         p = st.text_input("Password Baru", type="password")
@@ -94,10 +70,11 @@ pg_dash = st.Page("modules/01_Dashboard.py", title="Dashboard", icon="🏠")
 pg_chat = st.Page("modules/02_Chatbot.py", title="Asisten AI", icon="🤖")
 pg_mat = st.Page("modules/03_Materi.py", title="Materi", icon="📚")
 pg_quiz = st.Page("modules/04_Kuis.py", title="Kuis", icon="📝")
+pg_absensi = st.Page("modules/05_Absensi.py", title="Absensi", icon="📅") # Ditambahkan
 pg_out = st.Page(logout, title="Logout", icon="🚪")
 
 if not st.session_state["logged_in"]:
     pg = st.navigation([pg_login], position="hidden")
 else:
-    pg = st.navigation({"Utama": [pg_dash, pg_mat, pg_quiz], "Fitur": [pg_chat], "Sistem": [pg_out]})
+    pg = st.navigation({"Utama": [pg_dash, pg_mat, pg_quiz, pg_absensi], "Fitur": [pg_chat], "Sistem": [pg_out]})
 pg.run()
