@@ -8,18 +8,14 @@ if "logged_in" not in st.session_state:
 if "auth_mode" not in st.session_state:
     st.session_state["auth_mode"] = "login"
 
-# Centering logo untuk mobile - Logo diupdate ke SMK Bisa Hebat
+# Fungsi Logo Lokal (Pastikan file logo_smk.png ada di folder utama)
 def show_logo():
-    # URL logo SMK Bisa Hebat
-    logo_url = "https://smkbisa.kemdikbud.go.id/wp-content/uploads/2021/04/Logo-SMK-Bisa-Hebat.png"
-    st.markdown(
-        f"""
-        <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-            <img src="{logo_url}" width="200">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    try:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.image("logo_smk.png", use_container_width=True)
+    except:
+        st.warning("File logo_smk.png tidak ditemukan.")
 
 def login_page():
     if st.session_state["auth_mode"] == "login":
@@ -70,7 +66,7 @@ pg_dash = st.Page("modules/01_Dashboard.py", title="Dashboard", icon="🏠")
 pg_chat = st.Page("modules/02_Chatbot.py", title="Asisten AI", icon="🤖")
 pg_mat = st.Page("modules/03_Materi.py", title="Materi", icon="📚")
 pg_quiz = st.Page("modules/04_Kuis.py", title="Kuis", icon="📝")
-pg_absensi = st.Page("modules/05_Absensi.py", title="Absensi", icon="📅") # Ditambahkan
+pg_absensi = st.Page("modules/05_Absensi.py", title="Absensi", icon="📅")
 pg_out = st.Page(logout, title="Logout", icon="🚪")
 
 if not st.session_state["logged_in"]:
