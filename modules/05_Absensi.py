@@ -12,9 +12,9 @@ daftar_siswa = [
     "Aulia Septri Anisa"
 ]
 
-# Simpan status kehadiran dalam dictionary di session_state
+# Inisialisasi session state dengan None agar tidak ada yang terpilih otomatis
 if "absensi_data" not in st.session_state:
-    st.session_state["absensi_data"] = {siswa: "Hadir" for siswa in daftar_siswa}
+    st.session_state["absensi_data"] = {siswa: None for siswa in daftar_siswa}
 
 with st.form("absensi_form"):
     for siswa in daftar_siswa:
@@ -22,20 +22,25 @@ with st.form("absensi_form"):
         with col1:
             st.write(f"**{siswa}**")
         with col2:
-            # Pilihan status secara horizontal
+            # index=None membuat radio button tidak memilih opsi apa pun di awal
             st.session_state["absensi_data"][siswa] = st.radio(
                 f"Status {siswa}", 
                 ["Hadir", "Izin", "Sakit"], 
+                index=None, 
                 horizontal=True, 
                 label_visibility="collapsed",
                 key=f"radio_{siswa}"
             )
     
     if st.form_submit_button("Kirim Rekap Absensi"):
-        st.success("Absensi berhasil direkap!")
-        st.write(f"**Waktu:** {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
-        st.table(st.session_state["absensi_data"]) # Menampilkan hasil rekap dalam bentuk tabel
-        st.balloons()
+        # Pengecekan sederhana apakah semua sudah diisi
+        if None in st.session_state["absensi_data"].values():
+            st.warning("Mohon lengkapi status kehadiran untuk semua siswa!")
+        else:
+            st.success("Absensi berhasil direkap!")
+            st.write(f"**Waktu:** {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
+            st.table(st.session_state["absensi_data"])
+            st.balloons()
 
 if st.button("⬅️ Kembali ke Dashboard"):
     st.switch_page("modules/01_Dashboard.py")
