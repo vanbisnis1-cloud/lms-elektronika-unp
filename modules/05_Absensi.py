@@ -1,11 +1,10 @@
 import streamlit as st
 import datetime
 
-# Judul Halaman
 st.title("📅 Form Absensi Siswa")
-st.write("Silakan pilih nama Anda dan status kehadiran untuk simulasi mengajar hari ini.")
+st.write("Silakan pilih status kehadiran untuk setiap siswa pada simulasi mengajar hari ini.")
 
-# Daftar siswa sesuai permintaan Anda
+# Daftar siswa
 daftar_siswa = [
     "Ahmad Alfitra",
     "Fitri Nur Nazmi",
@@ -13,25 +12,30 @@ daftar_siswa = [
     "Aulia Septri Anisa"
 ]
 
-# Form Absensi
-with st.form("absensi_form"):
-    nama_siswa = st.selectbox("Pilih Nama Anda", daftar_siswa)
-    status_kehadiran = st.radio("Status Kehadiran", ["Hadir", "Izin", "Sakit"])
-    catatan = st.text_area("Catatan Tambahan (Opsional)")
-    
-    # Tombol submit
-    submit = st.form_submit_button("Kirim Absensi")
+# Simpan status kehadiran dalam dictionary di session_state
+if "absensi_data" not in st.session_state:
+    st.session_state["absensi_data"] = {siswa: "Hadir" for siswa in daftar_siswa}
 
-    if submit:
-        # Menampilkan konfirmasi (Untuk saat ini data tampil di layar)
-        st.success(f"Absensi berhasil dikirim!")
-        st.write(f"**Nama:** {nama_siswa}")
-        st.write(f"**Status:** {status_kehadiran}")
+with st.form("absensi_form"):
+    for siswa in daftar_siswa:
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            st.write(f"**{siswa}**")
+        with col2:
+            # Pilihan status secara horizontal
+            st.session_state["absensi_data"][siswa] = st.radio(
+                f"Status {siswa}", 
+                ["Hadir", "Izin", "Sakit"], 
+                horizontal=True, 
+                label_visibility="collapsed",
+                key=f"radio_{siswa}"
+            )
+    
+    if st.form_submit_button("Kirim Rekap Absensi"):
+        st.success("Absensi berhasil direkap!")
         st.write(f"**Waktu:** {datetime.datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
-        
-        # Anda bisa menambahkan logika penyimpanan ke database atau file CSV di sini
+        st.table(st.session_state["absensi_data"]) # Menampilkan hasil rekap dalam bentuk tabel
         st.balloons()
 
-# Tombol navigasi kembali
 if st.button("⬅️ Kembali ke Dashboard"):
     st.switch_page("modules/01_Dashboard.py")
