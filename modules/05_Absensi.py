@@ -9,7 +9,7 @@ daftar_siswa = [
     "Ahmad Alfitra",
     "Fitri Nur Nazmi",
     "Muhammad Ikhsan",
-    "Aulia Septri Anisa"
+    "Fikhi Khalil Fakhri"
 ]
 
 # Inisialisasi session state dengan None agar tidak ada yang terpilih otomatis
